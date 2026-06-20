@@ -1,5 +1,5 @@
-import React, { createContext, useState, ReactNode, useContext } from 'react';
-import { Usuario } from '../types';
+import { createContext, useState, useContext, type ReactNode } from 'react';
+import type { Usuario } from '../types';
 
 // Definimos qué funciones y datos tendrá nuestro contexto de sesión
 interface AuthContextType {
