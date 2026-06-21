@@ -2,13 +2,11 @@ import { useState, useEffect } from 'react';
 import type { Producto } from '../types';
 
 export const Inventario = () => {
-  // 1. Inicializamos el estado leyendo del disco duro del navegador
   const [productos, setProductos] = useState<Producto[]>(() => {
     const datosGuardados = localStorage.getItem('inventario_cencocal');
     if (datosGuardados) {
-      return JSON.parse(datosGuardados); // Si hay datos, los cargamos
+      return JSON.parse(datosGuardados);
     }
-    // Si es la primera vez que entra, cargamos estos de prueba
     return [
       { sku: 'BEB-001', nombre: 'Coca-Cola Original 2L', marca: 'Coca-Cola', categoria: 'Bebidas', stock: 150, precio: 1800 },
       { sku: 'CER-002', nombre: 'Cerveza Cristal Lata 355cc', marca: 'Cristal', categoria: 'Cervezas', stock: 320, precio: 800 },
@@ -16,7 +14,6 @@ export const Inventario = () => {
     ];
   });
 
-  // 2. Este "Hook" escucha los cambios. Cada vez que 'productos' cambia, se guarda en el disco duro.
   useEffect(() => {
     localStorage.setItem('inventario_cencocal', JSON.stringify(productos));
   }, [productos]);
@@ -28,49 +25,62 @@ export const Inventario = () => {
   const [stock, setStock] = useState('');
   const [precio, setPrecio] = useState('');
 
-  const agregarProducto = (e: React.FormEvent) => {
+  // ESTADO NUEVO: Controla si estamos creando uno nuevo o editando uno existente
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+
+  const guardarProducto = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!sku.trim() || !nombre.trim() || !marca.trim() || !categoria.trim() || stock === '' || precio === '') {
-      alert('❌ Error: Todos los campos son obligatorios. Por favor, completa toda la información.');
+      alert('❌ Error: Todos los campos son obligatorios.');
       return; 
     }
 
     const stockNum = Number(stock);
     const precioNum = Number(precio);
 
-    if (stockNum < 0) {
-      alert('❌ Error: El stock no puede ser un número negativo.');
-      return;
-    }
+    if (stockNum < 0) { alert('❌ Error: El stock no puede ser negativo.'); return; }
+    if (precioNum <= 0) { alert('❌ Error: El precio debe ser mayor a 0.'); return; }
+    if (sku.length < 4) { alert('❌ Error: El SKU ingresado es muy corto.'); return; }
 
-    if (precioNum <= 0) {
-      alert('❌ Error: El precio debe ser mayor a 0.');
-      return;
-    }
-
-    if (sku.length < 4) {
-      alert('❌ Error: El SKU ingresado es muy corto. Usa un formato válido (Ej: GAL-001).');
-      return;
-    }
-
-    const nuevoProducto: Producto = {
+    const productoFormulario: Producto = {
       sku: sku.toUpperCase(),
-      nombre: nombre,
-      marca: marca,
-      categoria: categoria,
-      stock: stockNum,
-      precio: precioNum
+      nombre, marca, categoria, stock: stockNum, precio: precioNum
     };
 
-    setProductos([...productos, nuevoProducto]);
+    if (editandoId) {
+      // 🔄 UPDATE: Reemplaza el producto editado en la lista
+      setProductos(productos.map(p => p.sku === editandoId ? productoFormulario : p));
+      setEditandoId(null);
+    } else {
+      // ➕ CREATE: Agrega un producto nuevo
+      if (productos.some(p => p.sku === productoFormulario.sku)) {
+        alert('❌ Error: Ya existe un producto con este SKU.');
+        return;
+      }
+      setProductos([...productos, productoFormulario]);
+    }
 
-    setSku('');
-    setNombre('');
-    setMarca('');
-    setCategoria('');
-    setStock('');
-    setPrecio('');
+    // Limpia el formulario
+    setSku(''); setNombre(''); setMarca(''); setCategoria(''); setStock(''); setPrecio('');
+  };
+
+  // 🗑️ DELETE: Elimina un producto de la lista
+  const eliminarProducto = (skuAEliminar: string) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+      setProductos(productos.filter(p => p.sku !== skuAEliminar));
+    }
+  };
+
+  // ✏️ PREPARAR UPDATE: Carga los datos en el formulario para poder editarlos
+  const editarProducto = (producto: Producto) => {
+    setSku(producto.sku);
+    setNombre(producto.nombre);
+    setMarca(producto.marca);
+    setCategoria(producto.categoria);
+    setStock(producto.stock.toString());
+    setPrecio(producto.precio.toString());
+    setEditandoId(producto.sku);
   };
 
   return (
@@ -78,42 +88,40 @@ export const Inventario = () => {
       <h2 style={{ borderBottom: '2px solid #007bff', paddingBottom: '10px' }}>Gestión de Inventario</h2>
       
       <div style={{ background: '#1e1e1e', padding: '20px', borderRadius: '8px', marginTop: '20px', color: 'white' }}>
-        <h3 style={{ marginTop: 0 }}>Agregar Nuevo Producto</h3>
-        <form onSubmit={agregarProducto} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          
+        <h3 style={{ marginTop: 0 }}>{editandoId ? '✏️ Editar Producto' : '➕ Agregar Nuevo Producto'}</h3>
+        <form onSubmit={guardarProducto} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>SKU:</label>
-            <input type="text" value={sku} onChange={(e) => setSku(e.target.value)} style={{ padding: '8px', width: '100px' }} />
+            <input type="text" value={sku} onChange={(e) => setSku(e.target.value)} disabled={!!editandoId} style={{ padding: '8px', width: '100px', backgroundColor: editandoId ? '#555' : 'white' }} />
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Nombre:</label>
             <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} style={{ padding: '8px', width: '200px' }} />
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Marca:</label>
             <input type="text" value={marca} onChange={(e) => setMarca(e.target.value)} style={{ padding: '8px', width: '120px' }} />
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Categoría:</label>
             <input type="text" value={categoria} onChange={(e) => setCategoria(e.target.value)} style={{ padding: '8px', width: '120px' }} />
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Stock:</label>
             <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} style={{ padding: '8px', width: '80px' }} />
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Precio:</label>
             <input type="number" value={precio} onChange={(e) => setPrecio(e.target.value)} style={{ padding: '8px', width: '100px' }} />
           </div>
-
-          <button type="submit" style={{ padding: '8px 20px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px' }}>
-            Guardar
+          <button type="submit" style={{ padding: '8px 20px', background: editandoId ? '#ffc107' : '#28a745', color: editandoId ? 'black' : 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px', fontWeight: 'bold' }}>
+            {editandoId ? 'Actualizar' : 'Guardar'}
           </button>
+          {editandoId && (
+            <button type="button" onClick={() => { setEditandoId(null); setSku(''); setNombre(''); setMarca(''); setCategoria(''); setStock(''); setPrecio(''); }} style={{ padding: '8px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px' }}>
+              Cancelar
+            </button>
+          )}
         </form>
       </div>
 
@@ -121,11 +129,12 @@ export const Inventario = () => {
         <thead>
           <tr style={{ backgroundColor: '#007bff' }}>
             <th style={{ padding: '12px', border: '1px solid #444' }}>SKU</th>
-            <th style={{ padding: '12px', border: '1px solid #444', textAlign: 'left' }}>Nombre del Producto</th>
+            <th style={{ padding: '12px', border: '1px solid #444', textAlign: 'left' }}>Nombre</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Marca</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Categoría</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Stock</th>
-            <th style={{ padding: '12px', border: '1px solid #444' }}>Precio (CLP)</th>
+            <th style={{ padding: '12px', border: '1px solid #444' }}>Precio</th>
+            <th style={{ padding: '12px', border: '1px solid #444' }}>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -137,6 +146,10 @@ export const Inventario = () => {
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>{producto.categoria}</td>
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center', fontWeight: 'bold' }}>{producto.stock}</td>
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>${producto.precio}</td>
+              <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>
+                <button onClick={() => editarProducto(producto)} style={{ background: '#ffc107', border: 'none', padding: '6px 10px', marginRight: '5px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Editar</button>
+                <button onClick={() => eliminarProducto(producto.sku)} style={{ background: '#dc3545', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Eliminar</button>
+              </td>
             </tr>
           ))}
         </tbody>
