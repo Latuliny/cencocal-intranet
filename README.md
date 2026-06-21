@@ -1,73 +1,36 @@
-# React + TypeScript + Vite
+# 🏢 Cencocal Intranet - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plataforma Frontend desarrollada como proyecto académico para la gestión interna de inventario y directorio de clientes de Cencocal. 
 
-Currently, two official plugins are available:
+Este proyecto fue construido utilizando **React** con **TypeScript** y empaquetado con **Vite** para garantizar un entorno de desarrollo rápido y tipado estricto.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Tecnologías Utilizadas
 
-## React Compiler
+*   **Vite:** Herramienta de construcción rápida.
+*   **React:** Librería principal para la construcción de interfaces.
+*   **TypeScript:** Superconjunto de JavaScript que añade tipado estático.
+*   **React Router DOM:** Para la gestión de rutas y navegación (Login, Inventario, Clientes).
+*   **Context API:** Para la simulación del estado global de autenticación (sesión de usuario).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 💻 Configuración Inicial (Vía CMD / Terminal)
 
-## Expanding the ESLint configuration
+Para la creación de este proyecto desde cero, se ejecutaron los siguientes comandos en la terminal de Windows (CMD):
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. **Creación del esqueleto del proyecto con Vite, React y TypeScript:**
+```cmd
+   npm create vite@latest cencocal-intranet -- --template react-ts
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2. Instalar las dependencias
+Navega hacia la carpeta del proyecto y descarga los módulos necesarios de Node:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+cd cencocal-intranet
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+3.Levantar el servidor de desarrollo
+Una vez finalizada la instalación, inicia Vite:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+npm run dev
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+4.Visualizar la aplicación
+Abre tu navegador web y visita la dirección local que te indique la terminal (generalmente es la siguiente):
+http://localhost:5173/
