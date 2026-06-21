@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-// 1. Interfaz exacta según los 5 campos obligatorios del requerimiento
+// 1. Interfaz exacta según los 5 campos obligatorios
 interface Cliente {
   rutNegocio: string;
   nombreLocal: string;
@@ -12,7 +12,18 @@ interface Cliente {
 export const Clientes = () => {
   const [clientes, setClientes] = useState<Cliente[]>(() => {
     const datosGuardados = localStorage.getItem('clientes_cencocal');
-    if (datosGuardados) { return JSON.parse(datosGuardados); }
+    if (datosGuardados) {
+      const parsed = JSON.parse(datosGuardados);
+      // MAGIA AQUÍ: Si el sistema detecta que la memoria tiene el formato viejo ('rut'), limpia el caché automáticamente.
+      if (parsed.length > 0 && parsed[0].rut !== undefined) {
+        localStorage.removeItem('clientes_cencocal');
+        return [
+          { rutNegocio: '76.543.210-K', nombreLocal: 'Minimarket Don Tito', nombreEncargado: 'Tito Ramírez', telefonoContacto: '+569 1234 5678', direccionDespacho: 'Av. Los Carrera 123' },
+          { rutNegocio: '12.345.678-9', nombreLocal: 'Distribuidora Central', nombreEncargado: 'María González', telefonoContacto: '+569 8765 4321', direccionDespacho: 'Calle Prat 456, Local 2' }
+        ];
+      }
+      return parsed;
+    }
     return [
       { rutNegocio: '76.543.210-K', nombreLocal: 'Minimarket Don Tito', nombreEncargado: 'Tito Ramírez', telefonoContacto: '+569 1234 5678', direccionDespacho: 'Av. Los Carrera 123' },
       { rutNegocio: '12.345.678-9', nombreLocal: 'Distribuidora Central', nombreEncargado: 'María González', telefonoContacto: '+569 8765 4321', direccionDespacho: 'Calle Prat 456, Local 2' }
@@ -23,7 +34,6 @@ export const Clientes = () => {
     localStorage.setItem('clientes_cencocal', JSON.stringify(clientes));
   }, [clientes]);
 
-  // 2. Estados para los 5 campos solicitados
   const [rutNegocio, setRutNegocio] = useState('');
   const [nombreLocal, setNombreLocal] = useState('');
   const [nombreEncargado, setNombreEncargado] = useState('');
@@ -35,7 +45,6 @@ export const Clientes = () => {
   const guardarCliente = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validación de los 5 campos
     if (!rutNegocio.trim() || !nombreLocal.trim() || !nombreEncargado.trim() || !telefonoContacto.trim() || !direccionDespacho.trim()) {
       alert('❌ Error: Los 5 campos son obligatorios para el registro.'); return;
     }
@@ -46,38 +55,27 @@ export const Clientes = () => {
       alert('❌ Error: El número de teléfono/celular ingresado es demasiado corto.'); return;
     }
 
-    const clienteFormulario: Cliente = { 
-      rutNegocio, 
-      nombreLocal, 
-      nombreEncargado,
-      telefonoContacto, 
-      direccionDespacho 
-    };
+    const clienteFormulario: Cliente = { rutNegocio, nombreLocal, nombreEncargado, telefonoContacto, direccionDespacho };
 
     if (editandoRut) {
-      // ACTUALIZAR (UPDATE)
       setClientes(clientes.map(c => c.rutNegocio === editandoRut ? clienteFormulario : c));
       setEditandoRut(null);
     } else {
-      // CREAR (CREATE)
       if (clientes.some(c => c.rutNegocio === clienteFormulario.rutNegocio)) {
         alert('❌ Error: Ya existe un negocio registrado con ese RUT.'); return;
       }
       setClientes([...clientes, clienteFormulario]);
     }
 
-    // Limpiar formulario
     setRutNegocio(''); setNombreLocal(''); setNombreEncargado(''); setTelefonoContacto(''); setDireccionDespacho('');
   };
 
-  // ELIMINAR (DELETE)
   const eliminarCliente = (rutAEliminar: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este negocio del directorio?')) {
       setClientes(clientes.filter(c => c.rutNegocio !== rutAEliminar));
     }
   };
 
-  // PREPARAR EDICIÓN
   const editarCliente = (cliente: Cliente) => {
     setRutNegocio(cliente.rutNegocio);
     setNombreLocal(cliente.nombreLocal);
@@ -97,27 +95,28 @@ export const Clientes = () => {
           
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>RUT del Negocio:</label>
-            <input type="text" value={rutNegocio} onChange={(e) => setRutNegocio(e.target.value)} disabled={!!editandoRut} placeholder="11.111.111-1" style={{ padding: '8px', width: '120px', backgroundColor: editandoRut ? '#555' : 'white' }} />
+            {/* Aquí forzamos que el texto siempre sea negro (color: 'black') al escribir */}
+            <input type="text" value={rutNegocio} onChange={(e) => setRutNegocio(e.target.value)} disabled={!!editandoRut} placeholder="11.111.111-1" style={{ padding: '8px', width: '120px', backgroundColor: editandoRut ? '#555' : 'white', color: editandoRut ? 'white' : 'black' }} />
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Nombre del Local:</label>
-            <input type="text" value={nombreLocal} onChange={(e) => setNombreLocal(e.target.value)} placeholder="Ej. Minimarket Don Tito" style={{ padding: '8px', width: '200px' }} />
+            <input type="text" value={nombreLocal} onChange={(e) => setNombreLocal(e.target.value)} placeholder="Ej. Minimarket Don Tito" style={{ padding: '8px', width: '200px', color: 'black' }} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Dueño o Encargado:</label>
-            <input type="text" value={nombreEncargado} onChange={(e) => setNombreEncargado(e.target.value)} style={{ padding: '8px', width: '180px' }} />
+            <input type="text" value={nombreEncargado} onChange={(e) => setNombreEncargado(e.target.value)} style={{ padding: '8px', width: '180px', color: 'black' }} />
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Teléfono o Celular:</label>
-            <input type="text" value={telefonoContacto} onChange={(e) => setTelefonoContacto(e.target.value)} style={{ padding: '8px', width: '140px' }} />
+            <input type="text" value={telefonoContacto} onChange={(e) => setTelefonoContacto(e.target.value)} style={{ padding: '8px', width: '140px', color: 'black' }} />
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Dirección Exacta:</label>
-            <input type="text" value={direccionDespacho} onChange={(e) => setDireccionDespacho(e.target.value)} style={{ padding: '8px', width: '220px' }} />
+            <input type="text" value={direccionDespacho} onChange={(e) => setDireccionDespacho(e.target.value)} style={{ padding: '8px', width: '220px', color: 'black' }} />
           </div>
 
           <button type="submit" style={{ padding: '8px 20px', background: editandoRut ? '#ffc107' : '#28a745', color: editandoRut ? 'black' : 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px', fontWeight: 'bold' }}>
