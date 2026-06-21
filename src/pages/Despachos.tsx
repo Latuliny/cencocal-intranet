@@ -33,9 +33,34 @@ export const Despachos = () => {
   const guardarDespacho = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // --- VALIDACIONES DE SEGURIDAD ESTRICTAS ---
+
+    // 1. Evitar campos vacíos
     if (!idPedido.trim() || !cliente.trim() || !productos.trim() || !direccion.trim()) {
       alert('❌ Error: Todos los campos del pedido son obligatorios.'); return;
     }
+
+    // 2. Validar largo del ID de pedido para evitar errores de tipeo
+    if (idPedido.trim().length < 4) {
+      alert('❌ Error: El ID del pedido es muy corto. Usa un formato válido (Ej: PED-001).'); return;
+    }
+
+    // 3. Validar largo del nombre del cliente
+    if (cliente.trim().length < 3) {
+      alert('❌ Error: El nombre del cliente destino debe tener al menos 3 caracteres.'); return;
+    }
+
+    // 4. Validar descripción de productos (evita que pongan cosas como "ok" o "nada")
+    if (productos.trim().length < 5) {
+      alert('❌ Error: La descripción de los productos es muy corta. Detalla bien el pedido.'); return;
+    }
+
+    // 5. Validar que la dirección sea coherente y no algo de 2 letras
+    if (direccion.trim().length < 5) {
+      alert('❌ Error: La dirección ingresada es muy corta. Ingresa la dirección exacta de entrega.'); return;
+    }
+
+    // --- FIN DE VALIDACIONES ---
 
     const nuevoDespacho: Despacho = { 
       idPedido: idPedido.toUpperCase(), 
@@ -52,23 +77,23 @@ export const Despachos = () => {
     } else {
       // CREATE
       if (despachos.some(d => d.idPedido === nuevoDespacho.idPedido)) {
-        alert('❌ Error: Ya existe un pedido con este ID.'); return;
+        alert('❌ Error: Ya existe un pedido registrado con este ID.'); return;
       }
       setDespachos([...despachos, nuevoDespacho]);
     }
 
-    // Limpiar
+    // Limpiar formulario
     setIdPedido(''); setCliente(''); setProductos(''); setDireccion(''); setEstado('Pendiente');
   };
 
   // DELETE
   const eliminarDespacho = (idAEliminar: string) => {
-    if (window.confirm('¿Estás seguro de cancelar o eliminar este pedido?')) {
+    if (window.confirm('¿Estás seguro de cancelar o eliminar este pedido logístico?')) {
       setDespachos(despachos.filter(d => d.idPedido !== idAEliminar));
     }
   };
 
-  // UPDATE PREPARATION
+  // PREPARAR UPDATE
   const editarDespacho = (despacho: Despacho) => {
     setIdPedido(despacho.idPedido);
     setCliente(despacho.cliente);
@@ -78,12 +103,12 @@ export const Despachos = () => {
     setEditandoId(despacho.idPedido);
   };
 
-  // Función para dar color al estado
+  // Función de colores según etapa de entrega
   const getColorEstado = (estado: string) => {
     switch (estado) {
-      case 'Pendiente': return '#ffc107'; // Amarillo
-      case 'En Ruta': return '#17a2b8'; // Azul claro
-      case 'Entregado': return '#28a745'; // Verde
+      case 'Pendiente': return '#ffc107'; 
+      case 'En Ruta': return '#17a2b8'; 
+      case 'Entregado': return '#28a745'; 
       default: return 'white';
     }
   };
@@ -105,7 +130,7 @@ export const Despachos = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Productos:</label>
-            <input type="text" value={productos} onChange={(e) => setProductos(e.target.value)} placeholder="Ej: 5x Cloro, 2x Escobas" style={{ padding: '8px', width: '220px' }} />
+            <input type="text" value={productos} onChange={(e) => setProductos(e.target.value)} placeholder="Ej: 5x Cloro" style={{ padding: '8px', width: '220px' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Dirección:</label>
