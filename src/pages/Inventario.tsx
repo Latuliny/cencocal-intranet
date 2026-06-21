@@ -1,12 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Producto } from '../types';
 
 export const Inventario = () => {
-  const [productos, setProductos] = useState<Producto[]>([
-    { sku: 'BEB-001', nombre: 'Coca-Cola Original 2L', marca: 'Coca-Cola', categoria: 'Bebidas', stock: 150, precio: 1800 },
-    { sku: 'CER-002', nombre: 'Cerveza Cristal Lata 355cc', marca: 'Cristal', categoria: 'Cervezas', stock: 320, precio: 800 },
-    { sku: 'ABA-003', nombre: 'Arroz Tucapel Grano Largo 1kg', marca: 'Tucapel', categoria: 'Abarrotes', stock: 85, precio: 1500 }
-  ]);
+  // 1. Inicializamos el estado leyendo del disco duro del navegador
+  const [productos, setProductos] = useState<Producto[]>(() => {
+    const datosGuardados = localStorage.getItem('inventario_cencocal');
+    if (datosGuardados) {
+      return JSON.parse(datosGuardados); // Si hay datos, los cargamos
+    }
+    // Si es la primera vez que entra, cargamos estos de prueba
+    return [
+      { sku: 'BEB-001', nombre: 'Coca-Cola Original 2L', marca: 'Coca-Cola', categoria: 'Bebidas', stock: 150, precio: 1800 },
+      { sku: 'CER-002', nombre: 'Cerveza Cristal Lata 355cc', marca: 'Cristal', categoria: 'Cervezas', stock: 320, precio: 800 },
+      { sku: 'ABA-003', nombre: 'Arroz Tucapel Grano Largo 1kg', marca: 'Tucapel', categoria: 'Abarrotes', stock: 85, precio: 1500 }
+    ];
+  });
+
+  // 2. Este "Hook" escucha los cambios. Cada vez que 'productos' cambia, se guarda en el disco duro.
+  useEffect(() => {
+    localStorage.setItem('inventario_cencocal', JSON.stringify(productos));
+  }, [productos]);
 
   const [sku, setSku] = useState('');
   const [nombre, setNombre] = useState('');
@@ -18,40 +31,31 @@ export const Inventario = () => {
   const agregarProducto = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // --- INICIO DE VALIDACIONES ---
-
-    // 1. Validar que ningún campo esté vacío
     if (!sku.trim() || !nombre.trim() || !marca.trim() || !categoria.trim() || stock === '' || precio === '') {
       alert('❌ Error: Todos los campos son obligatorios. Por favor, completa toda la información.');
       return; 
     }
 
-    // 2. Transformar el texto a números matemáticos para poder evaluarlos
     const stockNum = Number(stock);
     const precioNum = Number(precio);
 
-    // 3. Validar que el stock no sea negativo
     if (stockNum < 0) {
       alert('❌ Error: El stock no puede ser un número negativo.');
       return;
     }
 
-    // 4. Validar que el precio no sea gratis ni negativo
     if (precioNum <= 0) {
       alert('❌ Error: El precio debe ser mayor a 0.');
       return;
     }
 
-    // 5. Validar que el SKU no sea de solo 1 o 2 letras
     if (sku.length < 4) {
       alert('❌ Error: El SKU ingresado es muy corto. Usa un formato válido (Ej: GAL-001).');
       return;
     }
 
-    // --- FIN DE VALIDACIONES ---
-
     const nuevoProducto: Producto = {
-      sku: sku.toUpperCase(), // Esto convierte el SKU a mayúsculas automáticamente
+      sku: sku.toUpperCase(),
       nombre: nombre,
       marca: marca,
       categoria: categoria,
@@ -61,7 +65,6 @@ export const Inventario = () => {
 
     setProductos([...productos, nuevoProducto]);
 
-    // Limpiamos los campos
     setSku('');
     setNombre('');
     setMarca('');
