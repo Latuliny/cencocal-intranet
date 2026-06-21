@@ -19,7 +19,8 @@ export const Navbar = () => {
       <div>
         <span style={{ fontWeight: 'bold', fontSize: '1.2rem', marginRight: '30px' }}>Cencocal Intranet</span>
         <Link to="/inventario" style={{ color: 'white', textDecoration: 'none', marginRight: '20px', fontSize: '15px' }}>📦 Inventario</Link>
-        <Link to="/clientes" style={{ color: 'white', textDecoration: 'none', fontSize: '15px' }}>👥 Clientes</Link>
+        <Link to="/clientes" style={{ color: 'white', textDecoration: 'none', marginRight: '20px', fontSize: '15px' }}>👥 Clientes</Link>
+        <Link to="/despachos" style={{ color: 'white', textDecoration: 'none', fontSize: '15px' }}>🚚 Despachos</Link>
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center' }}>
