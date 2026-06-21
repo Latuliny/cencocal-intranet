@@ -2,14 +2,12 @@ import { useState } from 'react';
 import type { Producto } from '../types';
 
 export const Inventario = () => {
-  // 1. Estado de la lista (Aquí se guarda el inventario)
   const [productos, setProductos] = useState<Producto[]>([
     { sku: 'BEB-001', nombre: 'Coca-Cola Original 2L', marca: 'Coca-Cola', categoria: 'Bebidas', stock: 150, precio: 1800 },
     { sku: 'CER-002', nombre: 'Cerveza Cristal Lata 355cc', marca: 'Cristal', categoria: 'Cervezas', stock: 320, precio: 800 },
     { sku: 'ABA-003', nombre: 'Arroz Tucapel Grano Largo 1kg', marca: 'Tucapel', categoria: 'Abarrotes', stock: 85, precio: 1500 }
   ]);
 
-  // 2. Estados para controlar lo que el usuario escribe en las cajas de texto del formulario
   const [sku, setSku] = useState('');
   const [nombre, setNombre] = useState('');
   const [marca, setMarca] = useState('');
@@ -17,31 +15,53 @@ export const Inventario = () => {
   const [stock, setStock] = useState('');
   const [precio, setPrecio] = useState('');
 
-  // 3. Función que se dispara al hacer clic en "Guardar"
   const agregarProducto = (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que la página recargue
+    e.preventDefault();
 
-    // Pequeña validación de seguridad
-    if (!sku || !nombre || !precio) {
-      alert('Por favor llena al menos el SKU, Nombre y Precio del producto');
+    // --- INICIO DE VALIDACIONES ---
+
+    // 1. Validar que ningún campo esté vacío
+    if (!sku.trim() || !nombre.trim() || !marca.trim() || !categoria.trim() || stock === '' || precio === '') {
+      alert('❌ Error: Todos los campos son obligatorios. Por favor, completa toda la información.');
+      return; 
+    }
+
+    // 2. Transformar el texto a números matemáticos para poder evaluarlos
+    const stockNum = Number(stock);
+    const precioNum = Number(precio);
+
+    // 3. Validar que el stock no sea negativo
+    if (stockNum < 0) {
+      alert('❌ Error: El stock no puede ser un número negativo.');
       return;
     }
 
-    // Armamos el nuevo producto con los datos que escribió el usuario
+    // 4. Validar que el precio no sea gratis ni negativo
+    if (precioNum <= 0) {
+      alert('❌ Error: El precio debe ser mayor a 0.');
+      return;
+    }
+
+    // 5. Validar que el SKU no sea de solo 1 o 2 letras
+    if (sku.length < 4) {
+      alert('❌ Error: El SKU ingresado es muy corto. Usa un formato válido (Ej: GAL-001).');
+      return;
+    }
+
+    // --- FIN DE VALIDACIONES ---
+
     const nuevoProducto: Producto = {
-      sku: sku,
+      sku: sku.toUpperCase(), // Esto convierte el SKU a mayúsculas automáticamente
       nombre: nombre,
       marca: marca,
       categoria: categoria,
-      stock: Number(stock), // Convertimos el texto a número matemático
-      precio: Number(precio)
+      stock: stockNum,
+      precio: precioNum
     };
 
-    // ¡Aquí usamos el setProductos que antes nos daba advertencia amarilla!
-    // Le decimos: "Toma todo lo que había en la lista, y agrégale el producto nuevo"
     setProductos([...productos, nuevoProducto]);
 
-    // Limpiamos las cajas de texto para que queden en blanco
+    // Limpiamos los campos
     setSku('');
     setNombre('');
     setMarca('');
@@ -54,7 +74,6 @@ export const Inventario = () => {
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
       <h2 style={{ borderBottom: '2px solid #007bff', paddingBottom: '10px' }}>Gestión de Inventario</h2>
       
-      {/* --- FORMULARIO DE INGRESO --- */}
       <div style={{ background: '#1e1e1e', padding: '20px', borderRadius: '8px', marginTop: '20px', color: 'white' }}>
         <h3 style={{ marginTop: 0 }}>Agregar Nuevo Producto</h3>
         <form onSubmit={agregarProducto} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
@@ -95,7 +114,6 @@ export const Inventario = () => {
         </form>
       </div>
 
-      {/* --- TABLA DE INVENTARIO --- */}
       <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '30px', backgroundColor: '#1e1e1e', color: '#fff' }}>
         <thead>
           <tr style={{ backgroundColor: '#007bff' }}>
