@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 
-// 1. Interfaz exacta según los 5 campos obligatorios
 interface Cliente {
   rutNegocio: string;
   nombreLocal: string;
@@ -12,18 +11,7 @@ interface Cliente {
 export const Clientes = () => {
   const [clientes, setClientes] = useState<Cliente[]>(() => {
     const datosGuardados = localStorage.getItem('clientes_cencocal');
-    if (datosGuardados) {
-      const parsed = JSON.parse(datosGuardados);
-      // MAGIA AQUÍ: Si el sistema detecta que la memoria tiene el formato viejo ('rut'), limpia el caché automáticamente.
-      if (parsed.length > 0 && parsed[0].rut !== undefined) {
-        localStorage.removeItem('clientes_cencocal');
-        return [
-          { rutNegocio: '76.543.210-K', nombreLocal: 'Minimarket Don Tito', nombreEncargado: 'Tito Ramírez', telefonoContacto: '+569 1234 5678', direccionDespacho: 'Av. Los Carrera 123' },
-          { rutNegocio: '12.345.678-9', nombreLocal: 'Distribuidora Central', nombreEncargado: 'María González', telefonoContacto: '+569 8765 4321', direccionDespacho: 'Calle Prat 456, Local 2' }
-        ];
-      }
-      return parsed;
-    }
+    if (datosGuardados) { return JSON.parse(datosGuardados); }
     return [
       { rutNegocio: '76.543.210-K', nombreLocal: 'Minimarket Don Tito', nombreEncargado: 'Tito Ramírez', telefonoContacto: '+569 1234 5678', direccionDespacho: 'Av. Los Carrera 123' },
       { rutNegocio: '12.345.678-9', nombreLocal: 'Distribuidora Central', nombreEncargado: 'María González', telefonoContacto: '+569 8765 4321', direccionDespacho: 'Calle Prat 456, Local 2' }
@@ -39,12 +27,10 @@ export const Clientes = () => {
   const [nombreEncargado, setNombreEncargado] = useState('');
   const [telefonoContacto, setTelefonoContacto] = useState('');
   const [direccionDespacho, setDireccionDespacho] = useState('');
-
   const [editandoRut, setEditandoRut] = useState<string | null>(null);
 
   const guardarCliente = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!rutNegocio.trim() || !nombreLocal.trim() || !nombreEncargado.trim() || !telefonoContacto.trim() || !direccionDespacho.trim()) {
       alert('❌ Error: Los 5 campos son obligatorios para el registro.'); return;
     }
@@ -52,7 +38,7 @@ export const Clientes = () => {
       alert('❌ Error: Ingresa un RUT válido con guion (Ejemplo: 11.111.111-1).'); return;
     }
     if (telefonoContacto.trim().length < 8) {
-      alert('❌ Error: El número de teléfono/celular ingresado es demasiado corto.'); return;
+      alert('❌ Error: El número de teléfono ingresado es demasiado corto.'); return;
     }
 
     const clienteFormulario: Cliente = { rutNegocio, nombreLocal, nombreEncargado, telefonoContacto, direccionDespacho };
@@ -66,7 +52,6 @@ export const Clientes = () => {
       }
       setClientes([...clientes, clienteFormulario]);
     }
-
     setRutNegocio(''); setNombreLocal(''); setNombreEncargado(''); setTelefonoContacto(''); setDireccionDespacho('');
   };
 
@@ -77,56 +62,44 @@ export const Clientes = () => {
   };
 
   const editarCliente = (cliente: Cliente) => {
-    setRutNegocio(cliente.rutNegocio);
-    setNombreLocal(cliente.nombreLocal);
-    setNombreEncargado(cliente.nombreEncargado);
-    setTelefonoContacto(cliente.telefonoContacto);
-    setDireccionDespacho(cliente.direccionDespacho);
+    setRutNegocio(cliente.rutNegocio); setNombreLocal(cliente.nombreLocal); setNombreEncargado(cliente.nombreEncargado);
+    setTelefonoContacto(cliente.telefonoContacto); setDireccionDespacho(cliente.direccionDespacho);
     setEditandoRut(cliente.rutNegocio);
   };
+
+  const inputStyle = { padding: '8px', backgroundColor: '#333', color: 'white', border: '1px solid #555', borderRadius: '4px' };
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       <h2 style={{ borderBottom: '2px solid #007bff', paddingBottom: '10px' }}>Directorio de Comercios Asociados</h2>
-      
       <div style={{ background: '#1e1e1e', padding: '20px', borderRadius: '8px', marginTop: '20px', color: 'white' }}>
         <h3 style={{ marginTop: 0 }}>{editandoRut ? '✏️ Editar Negocio' : '➕ Registrar Nuevo Negocio'}</h3>
         <form onSubmit={guardarCliente} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>RUT del Negocio:</label>
-            {/* Aquí forzamos que el texto siempre sea negro (color: 'black') al escribir */}
-            <input type="text" value={rutNegocio} onChange={(e) => setRutNegocio(e.target.value)} disabled={!!editandoRut} placeholder="11.111.111-1" style={{ padding: '8px', width: '120px', backgroundColor: editandoRut ? '#555' : 'white', color: editandoRut ? 'white' : 'black' }} />
+            <input type="text" value={rutNegocio} onChange={(e) => setRutNegocio(e.target.value)} disabled={!!editandoRut} placeholder="11.111.111-1" style={{ ...inputStyle, width: '120px', backgroundColor: editandoRut ? '#555' : '#333' }} />
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Nombre del Local:</label>
-            <input type="text" value={nombreLocal} onChange={(e) => setNombreLocal(e.target.value)} placeholder="Ej. Minimarket Don Tito" style={{ padding: '8px', width: '200px', color: 'black' }} />
+            <input type="text" value={nombreLocal} onChange={(e) => setNombreLocal(e.target.value)} placeholder="Ej. Minimarket Don Tito" style={{ ...inputStyle, width: '200px' }} />
           </div>
-
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Dueño o Encargado:</label>
-            <input type="text" value={nombreEncargado} onChange={(e) => setNombreEncargado(e.target.value)} style={{ padding: '8px', width: '180px', color: 'black' }} />
+            <input type="text" value={nombreEncargado} onChange={(e) => setNombreEncargado(e.target.value)} style={{ ...inputStyle, width: '180px' }} />
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Teléfono o Celular:</label>
-            <input type="text" value={telefonoContacto} onChange={(e) => setTelefonoContacto(e.target.value)} style={{ padding: '8px', width: '140px', color: 'black' }} />
+            <input type="text" value={telefonoContacto} onChange={(e) => setTelefonoContacto(e.target.value)} style={{ ...inputStyle, width: '140px' }} />
           </div>
-          
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Dirección Exacta:</label>
-            <input type="text" value={direccionDespacho} onChange={(e) => setDireccionDespacho(e.target.value)} style={{ padding: '8px', width: '220px', color: 'black' }} />
+            <input type="text" value={direccionDespacho} onChange={(e) => setDireccionDespacho(e.target.value)} style={{ ...inputStyle, width: '220px' }} />
           </div>
-
           <button type="submit" style={{ padding: '8px 20px', background: editandoRut ? '#ffc107' : '#28a745', color: editandoRut ? 'black' : 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px', fontWeight: 'bold' }}>
             {editandoRut ? 'Actualizar' : 'Registrar'}
           </button>
-          
           {editandoRut && (
-            <button type="button" onClick={() => { setEditandoRut(null); setRutNegocio(''); setNombreLocal(''); setNombreEncargado(''); setTelefonoContacto(''); setDireccionDespacho(''); }} style={{ padding: '8px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px' }}>
-              Cancelar
-            </button>
+            <button type="button" onClick={() => { setEditandoRut(null); setRutNegocio(''); setNombreLocal(''); setNombreEncargado(''); setTelefonoContacto(''); setDireccionDespacho(''); }} style={{ padding: '8px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px' }}>Cancelar</button>
           )}
         </form>
       </div>

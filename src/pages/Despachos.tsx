@@ -27,83 +27,43 @@ export const Despachos = () => {
   const [productos, setProductos] = useState('');
   const [direccion, setDireccion] = useState('');
   const [estado, setEstado] = useState<'Pendiente' | 'En Ruta' | 'Entregado'>('Pendiente');
-
   const [editandoId, setEditandoId] = useState<string | null>(null);
 
   const guardarDespacho = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // --- VALIDACIONES DE SEGURIDAD ESTRICTAS ---
-
-    // 1. Evitar campos vacíos
     if (!idPedido.trim() || !cliente.trim() || !productos.trim() || !direccion.trim()) {
       alert('❌ Error: Todos los campos del pedido son obligatorios.'); return;
     }
+    if (idPedido.trim().length < 4) { alert('❌ Error: El ID del pedido es muy corto.'); return; }
+    if (cliente.trim().length < 3) { alert('❌ Error: El nombre del cliente es muy corto.'); return; }
+    if (productos.trim().length < 5) { alert('❌ Error: Detalla bien los productos.'); return; }
+    if (direccion.trim().length < 5) { alert('❌ Error: Ingresa una dirección exacta.'); return; }
 
-    // 2. Validar largo del ID de pedido para evitar errores de tipeo
-    if (idPedido.trim().length < 4) {
-      alert('❌ Error: El ID del pedido es muy corto. Usa un formato válido (Ej: PED-001).'); return;
-    }
-
-    // 3. Validar largo del nombre del cliente
-    if (cliente.trim().length < 3) {
-      alert('❌ Error: El nombre del cliente destino debe tener al menos 3 caracteres.'); return;
-    }
-
-    // 4. Validar descripción de productos (evita que pongan cosas como "ok" o "nada")
-    if (productos.trim().length < 5) {
-      alert('❌ Error: La descripción de los productos es muy corta. Detalla bien el pedido.'); return;
-    }
-
-    // 5. Validar que la dirección sea coherente y no algo de 2 letras
-    if (direccion.trim().length < 5) {
-      alert('❌ Error: La dirección ingresada es muy corta. Ingresa la dirección exacta de entrega.'); return;
-    }
-
-    // --- FIN DE VALIDACIONES ---
-
-    const nuevoDespacho: Despacho = { 
-      idPedido: idPedido.toUpperCase(), 
-      cliente, 
-      productos, 
-      direccion, 
-      estado 
-    };
+    const nuevoDespacho: Despacho = { idPedido: idPedido.toUpperCase(), cliente, productos, direccion, estado };
 
     if (editandoId) {
-      // UPDATE
       setDespachos(despachos.map(d => d.idPedido === editandoId ? nuevoDespacho : d));
       setEditandoId(null);
     } else {
-      // CREATE
       if (despachos.some(d => d.idPedido === nuevoDespacho.idPedido)) {
         alert('❌ Error: Ya existe un pedido registrado con este ID.'); return;
       }
       setDespachos([...despachos, nuevoDespacho]);
     }
-
-    // Limpiar formulario
     setIdPedido(''); setCliente(''); setProductos(''); setDireccion(''); setEstado('Pendiente');
   };
 
-  // DELETE
   const eliminarDespacho = (idAEliminar: string) => {
-    if (window.confirm('¿Estás seguro de cancelar o eliminar este pedido logístico?')) {
+    if (window.confirm('¿Estás seguro de cancelar o eliminar este pedido?')) {
       setDespachos(despachos.filter(d => d.idPedido !== idAEliminar));
     }
   };
 
-  // PREPARAR UPDATE
   const editarDespacho = (despacho: Despacho) => {
-    setIdPedido(despacho.idPedido);
-    setCliente(despacho.cliente);
-    setProductos(despacho.productos);
-    setDireccion(despacho.direccion);
-    setEstado(despacho.estado);
-    setEditandoId(despacho.idPedido);
+    setIdPedido(despacho.idPedido); setCliente(despacho.cliente); setProductos(despacho.productos);
+    setDireccion(despacho.direccion); setEstado(despacho.estado); setEditandoId(despacho.idPedido);
   };
 
-  // Función de colores según etapa de entrega
   const getColorEstado = (estado: string) => {
     switch (estado) {
       case 'Pendiente': return '#ffc107'; 
@@ -113,32 +73,33 @@ export const Despachos = () => {
     }
   };
 
+  const inputStyle = { padding: '8px', backgroundColor: '#333', color: 'white', border: '1px solid #555', borderRadius: '4px' };
+
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       <h2 style={{ borderBottom: '2px solid #007bff', paddingBottom: '10px' }}>Panel de Control de Despachos</h2>
-      
       <div style={{ background: '#1e1e1e', padding: '20px', borderRadius: '8px', marginTop: '20px', color: 'white' }}>
         <h3 style={{ marginTop: 0 }}>{editandoId ? '✏️ Actualizar Estado de Pedido' : '➕ Crear Nuevo Pedido'}</h3>
         <form onSubmit={guardarDespacho} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>ID Pedido:</label>
-            <input type="text" value={idPedido} onChange={(e) => setIdPedido(e.target.value)} disabled={!!editandoId} placeholder="PED-001" style={{ padding: '8px', width: '100px', backgroundColor: editandoId ? '#555' : 'white' }} />
+            <input type="text" value={idPedido} onChange={(e) => setIdPedido(e.target.value)} disabled={!!editandoId} placeholder="PED-001" style={{ ...inputStyle, width: '100px', backgroundColor: editandoId ? '#555' : '#333' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Cliente Destino:</label>
-            <input type="text" value={cliente} onChange={(e) => setCliente(e.target.value)} style={{ padding: '8px', width: '200px' }} />
+            <input type="text" value={cliente} onChange={(e) => setCliente(e.target.value)} style={{ ...inputStyle, width: '200px' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Productos:</label>
-            <input type="text" value={productos} onChange={(e) => setProductos(e.target.value)} placeholder="Ej: 5x Cloro" style={{ padding: '8px', width: '220px' }} />
+            <input type="text" value={productos} onChange={(e) => setProductos(e.target.value)} placeholder="Ej: 5x Cloro" style={{ ...inputStyle, width: '220px' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Dirección:</label>
-            <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} style={{ padding: '8px', width: '200px' }} />
+            <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} style={{ ...inputStyle, width: '200px' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Estado:</label>
-            <select value={estado} onChange={(e) => setEstado(e.target.value as any)} style={{ padding: '8px', width: '130px', cursor: 'pointer' }}>
+            <select value={estado} onChange={(e) => setEstado(e.target.value as any)} style={{ ...inputStyle, width: '130px', cursor: 'pointer' }}>
               <option value="Pendiente">Pendiente</option>
               <option value="En Ruta">En Ruta</option>
               <option value="Entregado">Entregado</option>
@@ -148,9 +109,7 @@ export const Despachos = () => {
             {editandoId ? 'Actualizar' : 'Registrar'}
           </button>
           {editandoId && (
-            <button type="button" onClick={() => { setEditandoId(null); setIdPedido(''); setCliente(''); setProductos(''); setDireccion(''); setEstado('Pendiente'); }} style={{ padding: '8px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px' }}>
-              Cancelar
-            </button>
+            <button type="button" onClick={() => { setEditandoId(null); setIdPedido(''); setCliente(''); setProductos(''); setDireccion(''); setEstado('Pendiente'); }} style={{ padding: '8px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px' }}>Cancelar</button>
           )}
         </form>
       </div>
