@@ -26,16 +26,40 @@ export const Inventario = () => {
 
   const guardarProducto = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 1. Validación de campos vacíos
     if (!sku.trim() || !nombre.trim() || !marca.trim() || !categoria.trim() || stock === '' || precio === '') {
       alert('❌ Error: Todos los campos son obligatorios.'); return; 
     }
+
+    // 2. NUEVA VALIDACIÓN: Evitar que campos de texto sean puros números
+    const esSoloNumeros = (texto: string) => /^\d+$/.test(texto.trim());
+    
+    if (esSoloNumeros(nombre)) {
+      alert('❌ Error: El nombre del producto no puede ser solo números.'); return;
+    }
+    if (esSoloNumeros(marca)) {
+      alert('❌ Error: La marca no puede ser solo números.'); return;
+    }
+    if (esSoloNumeros(categoria)) {
+      alert('❌ Error: La categoría no puede ser solo números.'); return;
+    }
+
+    // 3. Validación de números negativos y longitud del SKU
     const stockNum = Number(stock);
     const precioNum = Number(precio);
-    if (stockNum < 0) { alert('❌ Error: El stock no puede ser negativo.'); return; }
+    if (stockNum < 0) { alert('❌ Error: El stock (Existencias) no puede ser negativo.'); return; }
     if (precioNum <= 0) { alert('❌ Error: El precio debe ser mayor a 0.'); return; }
-    if (sku.length < 4) { alert('❌ Error: El SKU ingresado es muy corto.'); return; }
+    if (sku.trim().length < 4) { alert('❌ Error: El SKU ingresado es muy corto.'); return; }
 
-    const productoFormulario: Producto = { sku: sku.toUpperCase(), nombre, marca, categoria, stock: stockNum, precio: precioNum };
+    const productoFormulario: Producto = { 
+      sku: sku.toUpperCase().trim(), 
+      nombre: nombre.trim(), 
+      marca: marca.trim(), 
+      categoria: categoria.trim(), 
+      stock: stockNum, 
+      precio: precioNum 
+    };
 
     if (editandoId) {
       setProductos(productos.map(p => p.sku === editandoId ? productoFormulario : p));
@@ -61,7 +85,6 @@ export const Inventario = () => {
     setEditandoId(producto.sku);
   };
 
-  // Estilo unificado para los inputs
   const inputStyle = { padding: '8px', backgroundColor: '#333', color: 'white', border: '1px solid #555', borderRadius: '4px' };
 
   return (
@@ -87,7 +110,7 @@ export const Inventario = () => {
             <input type="text" value={categoria} onChange={(e) => setCategoria(e.target.value)} style={{ ...inputStyle, width: '120px' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <label style={{ fontSize: '14px', marginBottom: '4px' }}>Stock:</label>
+            <label style={{ fontSize: '14px', marginBottom: '4px' }}>Existencias:</label>
             <input 
               type="number" 
               min="0"
@@ -132,7 +155,7 @@ export const Inventario = () => {
             <th style={{ padding: '12px', border: '1px solid #444', textAlign: 'left' }}>Nombre</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Marca</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Categoría</th>
-            <th style={{ padding: '12px', border: '1px solid #444' }}>Stock</th>
+            <th style={{ padding: '12px', border: '1px solid #444' }}>Existencias</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Precio</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Acciones</th>
           </tr>
