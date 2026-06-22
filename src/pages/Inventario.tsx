@@ -88,11 +88,33 @@ export const Inventario = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Stock:</label>
-            <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} style={{ ...inputStyle, width: '80px' }} />
+            <input 
+              type="number" 
+              min="0"
+              value={stock} 
+              onChange={(e) => {
+                const valor = e.target.value;
+                if (valor === '' || Number(valor) >= 0) {
+                  setStock(valor);
+                }
+              }} 
+              style={{ ...inputStyle, width: '80px' }} 
+            />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Precio:</label>
-            <input type="number" value={precio} onChange={(e) => setPrecio(e.target.value)} style={{ ...inputStyle, width: '100px' }} />
+            <input 
+              type="number" 
+              min="0"
+              value={precio} 
+              onChange={(e) => {
+                const valor = e.target.value;
+                if (valor === '' || Number(valor) >= 0) {
+                  setPrecio(valor);
+                }
+              }} 
+              style={{ ...inputStyle, width: '100px' }} 
+            />
           </div>
           <button type="submit" style={{ padding: '8px 20px', background: editandoId ? '#ffc107' : '#28a745', color: editandoId ? 'black' : 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px', fontWeight: 'bold' }}>
             {editandoId ? 'Actualizar' : 'Guardar'}
