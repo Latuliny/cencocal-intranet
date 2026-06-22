@@ -31,9 +31,26 @@ export const Despachos = () => {
 
   const guardarDespacho = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 1. Validación de campos vacíos
     if (!idPedido.trim() || !cliente.trim() || !productos.trim() || !direccion.trim()) {
       alert('❌ Error: Todos los campos del pedido son obligatorios.'); return;
     }
+
+    // 2. NUEVA VALIDACIÓN: Evitar que campos de texto sean puros números
+    const esSoloNumeros = (texto: string) => /^\d+$/.test(texto.trim());
+    
+    if (esSoloNumeros(cliente)) {
+      alert('❌ Error: El nombre del cliente no puede ser solo números.'); return;
+    }
+    if (esSoloNumeros(productos)) {
+      alert('❌ Error: El detalle de productos no puede ser solo números.'); return;
+    }
+    if (esSoloNumeros(direccion)) {
+      alert('❌ Error: La dirección no puede ser solo números.'); return;
+    }
+
+    // 3. Validación de longitud
     if (idPedido.trim().length < 4) { alert('❌ Error: El ID del pedido es muy corto.'); return; }
     if (cliente.trim().length < 3) { alert('❌ Error: El nombre del cliente es muy corto.'); return; }
     if (productos.trim().length < 5) { alert('❌ Error: Detalla bien los productos.'); return; }

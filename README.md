@@ -33,4 +33,3 @@ npm run dev
 
 4.Visualizar la aplicación
 Abre tu navegador web y visita la dirección local que te indique la terminal (generalmente es la siguiente):
-http://localhost:5173/
