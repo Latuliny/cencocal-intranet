@@ -15,7 +15,7 @@ export const Navbar = () => {
   if (!user) return null;
 
   return (
-    <nav style={{ background: '#007bff', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white', marginBottom: '30px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+    <nav style={{ background: '#28a745', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div>
         <span style={{ fontWeight: 'bold', fontSize: '1.2rem', marginRight: '30px' }}>Cencocal Intranet</span>
         <Link to="/inventario" style={{ color: 'white', textDecoration: 'none', marginRight: '20px', fontSize: '15px' }}>📦 Inventario</Link>
