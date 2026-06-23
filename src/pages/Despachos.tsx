@@ -28,6 +28,17 @@ export const Despachos = () => {
       alert('❌ Error: Todos los campos del pedido son obligatorios.'); return;
     }
     if (idPedido.trim().length < 4) { alert('❌ Error: El ID del pedido es muy corto.'); return; }
+    
+    // --- NUEVAS VALIDACIONES ESTRICTAS ---
+    const regexSoloNumeros = /^\d+$/;
+    if (regexSoloNumeros.test(cliente.trim())) {
+      alert('❌ Error: El nombre del cliente destino no puede ser únicamente numérico.'); return;
+    }
+    if (regexSoloNumeros.test(productos.trim())) {
+      alert('❌ Error: El detalle de los productos no puede contener solo números.'); return;
+    }
+    // -------------------------------------
+
     if (cliente.trim().length < 3) { alert('❌ Error: El nombre del cliente es muy corto.'); return; }
     if (productos.trim().length < 5) { alert('❌ Error: Detalla bien los productos.'); return; }
     if (direccion.trim().length < 5) { alert('❌ Error: Ingresa una dirección exacta.'); return; }

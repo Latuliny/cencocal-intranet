@@ -31,6 +31,23 @@ export const Clientes = () => {
       alert('❌ Error: Ingresa un RUT válido con guion (Ejemplo: 11.111.111-1).'); return;
     }
 
+    // --- NUEVAS VALIDACIONES ESTRICTAS ---
+    const regexSoloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    if (!regexSoloLetras.test(nombreEncargado.trim())) {
+      alert('❌ Error: El nombre del dueño o encargado solo debe contener letras.'); return;
+    }
+
+    const regexSoloNumeros = /^\d+$/;
+    if (regexSoloNumeros.test(nombreLocal.trim())) {
+      alert('❌ Error: El nombre del local no puede estar compuesto únicamente por números.'); return;
+    }
+
+    const regexTelefono = /^\+?[0-9\s-]{8,15}$/;
+    if (!regexTelefono.test(telefonoContacto.trim())) {
+      alert('❌ Error: Ingresa un teléfono válido (ej: +569 1234 5678).'); return;
+    }
+    // -------------------------------------
+
     const clienteFormulario: Cliente = { rutNegocio, nombreLocal, nombreEncargado, telefonoContacto, direccionDespacho };
 
     if (editandoRut) {

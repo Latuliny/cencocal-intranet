@@ -24,8 +24,6 @@ export const Inventario = () => {
   const [stock, setStock] = useState('');
   const [precio, setPrecio] = useState('');
   const [editandoId, setEditandoId] = useState<string | null>(null);
-
-  // Estado para la búsqueda dinámica
   const [busqueda, setBusqueda] = useState('');
 
   const guardarProducto = (e: React.FormEvent) => {
@@ -34,6 +32,22 @@ export const Inventario = () => {
     if (!sku.trim() || !nombre.trim() || !marca.trim() || !categoria.trim() || stock === '' || precio === '') {
       alert('❌ Error: Todos los campos son obligatorios.'); return; 
     }
+
+    // --- NUEVAS VALIDACIONES ESTRICTAS ---
+    const regexSoloNumeros = /^\d+$/;
+    if (regexSoloNumeros.test(nombre.trim())) {
+      alert('❌ Error: El nombre del producto no puede contener únicamente números.'); return;
+    }
+    if (regexSoloNumeros.test(marca.trim())) {
+      alert('❌ Error: La marca no puede ser puramente numérica.'); return;
+    }
+    
+    const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    if (!regexLetras.test(categoria.trim())) {
+      alert('❌ Error: La categoría solo debe contener letras.'); return;
+    }
+    // -------------------------------------
+
     const stockNum = Number(stock);
     const precioNum = Number(precio);
     if (stockNum < 0) { alert('❌ Error: El stock no puede ser negativo.'); return; }
@@ -66,7 +80,6 @@ export const Inventario = () => {
     setEditandoId(producto.sku);
   };
 
-  // Lógica de filtrado para el buscador
   const productosFiltrados = productos.filter(p => 
     p.nombre.toLowerCase().includes(busqueda.toLowerCase()) || 
     p.sku.toLowerCase().includes(busqueda.toLowerCase())
@@ -113,7 +126,6 @@ export const Inventario = () => {
         </form>
       </div>
 
-      {/* BARRA DE BÚSQUEDA */}
       <div style={{ marginTop: '30px', marginBottom: '10px' }}>
         <input 
           type="text" 
