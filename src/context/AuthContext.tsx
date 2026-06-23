@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { createContext, useState, useContext, ReactNode } from 'react';
 import { Usuario } from '../types';
 
 interface AuthContextType {
@@ -10,7 +10,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // Inicializamos leyendo el localStorage para que la sesión sobreviva al F5
   const [user, setUser] = useState<Usuario | null>(() => {
     const savedUser = localStorage.getItem('usuario_sesion');
     return savedUser ? JSON.parse(savedUser) : null;

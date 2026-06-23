@@ -1,52 +1,41 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export const Login = () => {
-  // Estados para guardar lo que se escribe en las cajas de texto
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
-  // Traemos la función "login" de nuestro contexto y la herramienta de navegación
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Función que se ejecuta al presionar "Ingresar"
   const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que la página recargue 
+    e.preventDefault();
     
-    // Verificamos que las cajas no estén vacías
-    if (username.trim() !== '' && password.trim() !== '') {
-      login(username, 'Vendedor'); // Guardamos la sesión
-      navigate('/inventario'); // Redirigimos automáticamente al inventario
+    // Validación real de credenciales
+    if (username === 'admin' && password === '1234') {
+      login(username, 'Administrador');
+      navigate('/inventario');
     } else {
-      alert('Por favor ingresa tu usuario y contraseña.');
+      alert('❌ Error: Usuario o contraseña incorrectos.');
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h2>Iniciar Sesión - Cencocal</h2>
-      <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Usuario:</label>
-          <input 
-            type="text" 
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-          />
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#121212', color: 'white' }}>
+      <form onSubmit={handleLogin} style={{ background: '#1e1e1e', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)', width: '300px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '10px', color: '#007bff' }}>Cencocal Intranet</h2>
+        
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label style={{ marginBottom: '5px', fontSize: '14px' }}>Usuario:</label>
+          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} style={{ padding: '10px', borderRadius: '4px', border: '1px solid #444', backgroundColor: '#333', color: 'white' }} placeholder="admin" />
         </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Contraseña:</label>
-          <input 
-            type="password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-          />
+
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label style={{ marginBottom: '5px', fontSize: '14px' }}>Contraseña:</label>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ padding: '10px', borderRadius: '4px', border: '1px solid #444', backgroundColor: '#333', color: 'white' }} placeholder="1234" />
         </div>
-        <button type="submit" style={{ padding: '10px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+
+        <button type="submit" style={{ padding: '10px', borderRadius: '4px', border: 'none', backgroundColor: '#007bff', color: 'white', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>
           Ingresar
         </button>
       </form>
