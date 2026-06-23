@@ -1,28 +1,30 @@
-import { createContext, useState, useContext, type ReactNode } from 'react';
-import type { Usuario } from '../types';
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { Usuario } from '../types';
 
-// Definimos qué funciones y datos tendrá nuestro contexto de sesión
 interface AuthContextType {
   user: Usuario | null;
   login: (username: string, rol: string) => void;
   logout: () => void;
 }
 
-// Creamos el contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Creamos el "Proveedor" que envolverá a nuestra aplicación
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<Usuario | null>(null);
+  // Inicializamos leyendo el localStorage para que la sesión sobreviva al F5
+  const [user, setUser] = useState<Usuario | null>(() => {
+    const savedUser = localStorage.getItem('usuario_sesion');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  // Función simulada para iniciar sesión
   const login = (username: string, rol: string) => {
-    setUser({ username, rol });
+    const newUser = { username, rol };
+    setUser(newUser);
+    localStorage.setItem('usuario_sesion', JSON.stringify(newUser));
   };
 
-  // Función para cerrar sesión
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('usuario_sesion');
   };
 
   return (
@@ -32,11 +34,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Pequeño atajo (Hook) para usar esta sesión en cualquier pantalla
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth debe usarse dentro de un AuthProvider");
-  }
+  if (!context) throw new Error('useAuth debe usarse dentro de AuthProvider');
   return context;
 };

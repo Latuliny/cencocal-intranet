@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import type { Producto } from '../types';
+import { Producto } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 export const Inventario = () => {
+  const navigate = useNavigate();
   const [productos, setProductos] = useState<Producto[]>(() => {
     const datosGuardados = localStorage.getItem('inventario_cencocal');
     if (datosGuardados) { return JSON.parse(datosGuardados); }
     return [
       { sku: 'BEB-001', nombre: 'Coca-Cola Original 2L', marca: 'Coca-Cola', categoria: 'Bebidas', stock: 150, precio: 1800 },
-      { sku: 'CER-002', nombre: 'Cerveza Cristal Lata 355cc', marca: 'Cristal', categoria: 'Cervezas', stock: 320, precio: 800 },
-      { sku: 'ABA-003', nombre: 'Arroz Tucapel Grano Largo 1kg', marca: 'Tucapel', categoria: 'Abarrotes', stock: 85, precio: 1500 }
+      { sku: 'CER-002', nombre: 'Cerveza Cristal Lata 355cc', marca: 'Cristal', categoria: 'Cervezas', stock: 320, precio: 800 }
     ];
   });
 
@@ -24,42 +25,22 @@ export const Inventario = () => {
   const [precio, setPrecio] = useState('');
   const [editandoId, setEditandoId] = useState<string | null>(null);
 
+  // Estado para la búsqueda dinámica
+  const [busqueda, setBusqueda] = useState('');
+
   const guardarProducto = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); 
     
-    // 1. Validación de campos vacíos
     if (!sku.trim() || !nombre.trim() || !marca.trim() || !categoria.trim() || stock === '' || precio === '') {
       alert('❌ Error: Todos los campos son obligatorios.'); return; 
     }
-
-    // 2. NUEVA VALIDACIÓN: Evitar que campos de texto sean puros números
-    const esSoloNumeros = (texto: string) => /^\d+$/.test(texto.trim());
-    
-    if (esSoloNumeros(nombre)) {
-      alert('❌ Error: El nombre del producto no puede ser solo números.'); return;
-    }
-    if (esSoloNumeros(marca)) {
-      alert('❌ Error: La marca no puede ser solo números.'); return;
-    }
-    if (esSoloNumeros(categoria)) {
-      alert('❌ Error: La categoría no puede ser solo números.'); return;
-    }
-
-    // 3. Validación de números negativos y longitud del SKU
     const stockNum = Number(stock);
     const precioNum = Number(precio);
-    if (stockNum < 0) { alert('❌ Error: El stock (Existencias) no puede ser negativo.'); return; }
+    if (stockNum < 0) { alert('❌ Error: El stock no puede ser negativo.'); return; }
     if (precioNum <= 0) { alert('❌ Error: El precio debe ser mayor a 0.'); return; }
-    if (sku.trim().length < 4) { alert('❌ Error: El SKU ingresado es muy corto.'); return; }
+    if (sku.length < 4) { alert('❌ Error: El SKU ingresado es muy corto.'); return; }
 
-    const productoFormulario: Producto = { 
-      sku: sku.toUpperCase().trim(), 
-      nombre: nombre.trim(), 
-      marca: marca.trim(), 
-      categoria: categoria.trim(), 
-      stock: stockNum, 
-      precio: precioNum 
-    };
+    const productoFormulario: Producto = { sku: sku.toUpperCase(), nombre, marca, categoria, stock: stockNum, precio: precioNum };
 
     if (editandoId) {
       setProductos(productos.map(p => p.sku === editandoId ? productoFormulario : p));
@@ -84,6 +65,12 @@ export const Inventario = () => {
     setCategoria(producto.categoria); setStock(producto.stock.toString()); setPrecio(producto.precio.toString());
     setEditandoId(producto.sku);
   };
+
+  // Lógica de filtrado para el buscador
+  const productosFiltrados = productos.filter(p => 
+    p.nombre.toLowerCase().includes(busqueda.toLowerCase()) || 
+    p.sku.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   const inputStyle = { padding: '8px', backgroundColor: '#333', color: 'white', border: '1px solid #555', borderRadius: '4px' };
 
@@ -110,34 +97,12 @@ export const Inventario = () => {
             <input type="text" value={categoria} onChange={(e) => setCategoria(e.target.value)} style={{ ...inputStyle, width: '120px' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <label style={{ fontSize: '14px', marginBottom: '4px' }}>Existencias:</label>
-            <input 
-              type="number" 
-              min="0"
-              value={stock} 
-              onChange={(e) => {
-                const valor = e.target.value;
-                if (valor === '' || Number(valor) >= 0) {
-                  setStock(valor);
-                }
-              }} 
-              style={{ ...inputStyle, width: '80px' }} 
-            />
+            <label style={{ fontSize: '14px', marginBottom: '4px' }}>Stock Disponible:</label>
+            <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} style={{ ...inputStyle, width: '120px' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <label style={{ fontSize: '14px', marginBottom: '4px' }}>Precio:</label>
-            <input 
-              type="number" 
-              min="0"
-              value={precio} 
-              onChange={(e) => {
-                const valor = e.target.value;
-                if (valor === '' || Number(valor) >= 0) {
-                  setPrecio(valor);
-                }
-              }} 
-              style={{ ...inputStyle, width: '100px' }} 
-            />
+            <label style={{ fontSize: '14px', marginBottom: '4px' }}>Precio Mayorista:</label>
+            <input type="number" value={precio} onChange={(e) => setPrecio(e.target.value)} style={{ ...inputStyle, width: '120px' }} />
           </div>
           <button type="submit" style={{ padding: '8px 20px', background: editandoId ? '#ffc107' : '#28a745', color: editandoId ? 'black' : 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px', fontWeight: 'bold' }}>
             {editandoId ? 'Actualizar' : 'Guardar'}
@@ -148,20 +113,31 @@ export const Inventario = () => {
         </form>
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '30px', backgroundColor: '#1e1e1e', color: '#fff' }}>
+      {/* BARRA DE BÚSQUEDA */}
+      <div style={{ marginTop: '30px', marginBottom: '10px' }}>
+        <input 
+          type="text" 
+          placeholder="🔍 Buscar producto por nombre o código SKU..." 
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          style={{ width: '100%', padding: '12px', backgroundColor: '#1e1e1e', color: 'white', border: '1px solid #444', borderRadius: '8px', fontSize: '15px' }}
+        />
+      </div>
+
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px', backgroundColor: '#1e1e1e', color: '#fff' }}>
         <thead>
           <tr style={{ backgroundColor: '#007bff' }}>
             <th style={{ padding: '12px', border: '1px solid #444' }}>SKU</th>
             <th style={{ padding: '12px', border: '1px solid #444', textAlign: 'left' }}>Nombre</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Marca</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Categoría</th>
-            <th style={{ padding: '12px', border: '1px solid #444' }}>Existencias</th>
-            <th style={{ padding: '12px', border: '1px solid #444' }}>Precio</th>
+            <th style={{ padding: '12px', border: '1px solid #444' }}>Stock Disponible</th>
+            <th style={{ padding: '12px', border: '1px solid #444' }}>Precio Mayorista</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {productos.map((producto) => (
+          {productosFiltrados.map((producto) => (
             <tr key={producto.sku}>
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>{producto.sku}</td>
               <td style={{ padding: '10px', border: '1px solid #444' }}>{producto.nombre}</td>
@@ -169,12 +145,18 @@ export const Inventario = () => {
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>{producto.categoria}</td>
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center', fontWeight: 'bold' }}>{producto.stock}</td>
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>${producto.precio}</td>
-              <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>
+              <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center', minWidth: '240px' }}>
+                <button onClick={() => navigate(`/inventario/${producto.sku}`)} style={{ background: '#17a2b8', color: 'white', border: 'none', padding: '6px 10px', marginRight: '5px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Ver Detalle</button>
                 <button onClick={() => editarProducto(producto)} style={{ background: '#ffc107', color: 'black', border: 'none', padding: '6px 10px', marginRight: '5px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Editar</button>
                 <button onClick={() => eliminarProducto(producto.sku)} style={{ background: '#dc3545', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Eliminar</button>
               </td>
             </tr>
           ))}
+          {productosFiltrados.length === 0 && (
+            <tr>
+              <td colSpan={7} style={{ padding: '20px', textAlign: 'center', color: '#ccc' }}>No se encontraron productos con esa búsqueda.</td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

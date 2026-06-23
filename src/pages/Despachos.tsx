@@ -1,12 +1,5 @@
 import { useState, useEffect } from 'react';
-
-interface Despacho {
-  idPedido: string;
-  cliente: string;
-  productos: string;
-  direccion: string;
-  estado: 'Pendiente' | 'En Ruta' | 'Entregado';
-}
+import { Despacho, EstadoDespacho } from '../types';
 
 export const Despachos = () => {
   const [despachos, setDespachos] = useState<Despacho[]>(() => {
@@ -26,31 +19,14 @@ export const Despachos = () => {
   const [cliente, setCliente] = useState('');
   const [productos, setProductos] = useState('');
   const [direccion, setDireccion] = useState('');
-  const [estado, setEstado] = useState<'Pendiente' | 'En Ruta' | 'Entregado'>('Pendiente');
+  const [estado, setEstado] = useState<EstadoDespacho>('Pendiente');
   const [editandoId, setEditandoId] = useState<string | null>(null);
 
   const guardarDespacho = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 1. Validación de campos vacíos
     if (!idPedido.trim() || !cliente.trim() || !productos.trim() || !direccion.trim()) {
       alert('❌ Error: Todos los campos del pedido son obligatorios.'); return;
     }
-
-    // 2. NUEVA VALIDACIÓN: Evitar que campos de texto sean puros números
-    const esSoloNumeros = (texto: string) => /^\d+$/.test(texto.trim());
-    
-    if (esSoloNumeros(cliente)) {
-      alert('❌ Error: El nombre del cliente no puede ser solo números.'); return;
-    }
-    if (esSoloNumeros(productos)) {
-      alert('❌ Error: El detalle de productos no puede ser solo números.'); return;
-    }
-    if (esSoloNumeros(direccion)) {
-      alert('❌ Error: La dirección no puede ser solo números.'); return;
-    }
-
-    // 3. Validación de longitud
     if (idPedido.trim().length < 4) { alert('❌ Error: El ID del pedido es muy corto.'); return; }
     if (cliente.trim().length < 3) { alert('❌ Error: El nombre del cliente es muy corto.'); return; }
     if (productos.trim().length < 5) { alert('❌ Error: Detalla bien los productos.'); return; }
@@ -84,7 +60,7 @@ export const Despachos = () => {
   const getColorEstado = (estado: string) => {
     switch (estado) {
       case 'Pendiente': return '#ffc107'; 
-      case 'En Ruta': return '#17a2b8'; 
+      case 'En Ruta': return '#17a2b8';  
       case 'Entregado': return '#28a745'; 
       default: return 'white';
     }
@@ -94,7 +70,7 @@ export const Despachos = () => {
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
-      <h2 style={{ borderBottom: '2px solid #007bff', paddingBottom: '10px' }}>Panel de Control de Despachos</h2>
+      <h2 style={{ borderBottom: '2px solid #007bff', paddingBottom: '10px' }}>Panel de Gestión de Pre-órdenes Logísticas</h2>
       <div style={{ background: '#1e1e1e', padding: '20px', borderRadius: '8px', marginTop: '20px', color: 'white' }}>
         <h3 style={{ marginTop: 0 }}>{editandoId ? '✏️ Actualizar Estado de Pedido' : '➕ Crear Nuevo Pedido'}</h3>
         <form onSubmit={guardarDespacho} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
@@ -116,7 +92,7 @@ export const Despachos = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Estado:</label>
-            <select value={estado} onChange={(e) => setEstado(e.target.value as any)} style={{ ...inputStyle, width: '130px', cursor: 'pointer' }}>
+            <select value={estado} onChange={(e) => setEstado(e.target.value as EstadoDespacho)} style={{ ...inputStyle, width: '130px', cursor: 'pointer' }}>
               <option value="Pendiente">Pendiente</option>
               <option value="En Ruta">En Ruta</option>
               <option value="Entregado">Entregado</option>
