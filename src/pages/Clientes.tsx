@@ -71,7 +71,7 @@ export const Clientes = () => {
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
-      <h2 style={{ borderBottom: '2px solid #007bff', paddingBottom: '10px' }}>Directorio de Comercios Asociados</h2>
+      <h2 style={{ borderBottom: '2px solid #ff0000', paddingBottom: '10px' }}>Directorio de Comercios Asociados</h2>
       <div style={{ background: '#1e1e1e', padding: '20px', borderRadius: '8px', marginTop: '20px', color: 'white' }}>
         <h3 style={{ marginTop: 0 }}>{editandoRut ? '✏️ Editar Negocio' : '➕ Registrar Nuevo Negocio'}</h3>
         <form onSubmit={guardarCliente} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
@@ -106,7 +106,7 @@ export const Clientes = () => {
 
       <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '30px', backgroundColor: '#1e1e1e', color: '#fff' }}>
         <thead>
-          <tr style={{ backgroundColor: '#007bff' }}>
+          <tr style={{ backgroundColor: '#51ff00' }}>
             <th style={{ padding: '12px', border: '1px solid #444', textAlign: 'left' }}>RUT</th>
             <th style={{ padding: '12px', border: '1px solid #444', textAlign: 'left' }}>Nombre Local</th>
             <th style={{ padding: '12px', border: '1px solid #444', textAlign: 'left' }}>Dueño/Encargado</th>
