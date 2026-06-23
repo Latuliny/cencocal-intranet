@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import type { Producto } from '../types';
 
 export const Inventario = () => {
+  // AQUÍ ES DONDE SE AGREGAN LOS PRODUCTOS POR DEFECTO
   const [productos, setProductos] = useState<Producto[]>(() => {
     const datosGuardados = localStorage.getItem('inventario_cencocal');
     if (datosGuardados) { return JSON.parse(datosGuardados); }
     return [
-      { sku: 'BEB-001', nombre: 'Coca-Cola Original 2L', marca: 'Coca-Cola', categoria: 'Bebidas', stock: 150, precio: 1800 },
-      { sku: 'CER-002', nombre: 'Cerveza Cristal Lata 355cc', marca: 'Cristal', categoria: 'Cervezas', stock: 320, precio: 800 },
-      { sku: 'ABA-003', nombre: 'Arroz Tucapel Grano Largo 1kg', marca: 'Tucapel', categoria: 'Abarrotes', stock: 85, precio: 1500 }
+      { sku: 'BEB-001', nombre: 'Coca-Cola Original 2L', marca: 'Coca-Cola', categoria: 'Bebidas', stock: 150, precio: 1800, vencimiento: '2026-12-31' },
+      { sku: 'CER-002', nombre: 'Cerveza Cristal Lata 355cc', marca: 'Cristal', categoria: 'Cervezas', stock: 320, precio: 800, vencimiento: '2027-05-15' },
+      { sku: 'ABA-003', nombre: 'Arroz Tucapel Grano Largo 1kg', marca: 'Tucapel', categoria: 'Abarrotes', stock: 85, precio: 1500, vencimiento: '2028-10-20' }
     ];
   });
 
@@ -20,6 +21,7 @@ export const Inventario = () => {
   const [nombre, setNombre] = useState('');
   const [marca, setMarca] = useState('');
   const [categoria, setCategoria] = useState('');
+  const [vencimiento, setVencimiento] = useState(''); // <-- Nuevo estado para la fecha
   const [stock, setStock] = useState('');
   const [precio, setPrecio] = useState('');
   const [editandoId, setEditandoId] = useState<string | null>(null);
@@ -27,12 +29,12 @@ export const Inventario = () => {
   const guardarProducto = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 1. Validación de campos vacíos
-    if (!sku.trim() || !nombre.trim() || !marca.trim() || !categoria.trim() || stock === '' || precio === '') {
-      alert('❌ Error: Todos los campos son obligatorios.'); return; 
+    // 1. Validación de campos vacíos (incluyendo vencimiento)
+    if (!sku.trim() || !nombre.trim() || !marca.trim() || !categoria.trim() || !vencimiento || stock === '' || precio === '') {
+      alert('❌ Error: Todos los campos son obligatorios, incluyendo la fecha de vencimiento.'); return; 
     }
 
-    // 2. NUEVA VALIDACIÓN: Evitar que campos de texto sean puros números
+    // 2. Validación: Evitar que campos de texto sean puros números
     const esSoloNumeros = (texto: string) => /^\d+$/.test(texto.trim());
     
     if (esSoloNumeros(nombre)) {
@@ -56,7 +58,8 @@ export const Inventario = () => {
       sku: sku.toUpperCase().trim(), 
       nombre: nombre.trim(), 
       marca: marca.trim(), 
-      categoria: categoria.trim(), 
+      categoria: categoria.trim(),
+      vencimiento, // <-- Se agrega al objeto
       stock: stockNum, 
       precio: precioNum 
     };
@@ -70,7 +73,7 @@ export const Inventario = () => {
       }
       setProductos([...productos, productoFormulario]);
     }
-    setSku(''); setNombre(''); setMarca(''); setCategoria(''); setStock(''); setPrecio('');
+    setSku(''); setNombre(''); setMarca(''); setCategoria(''); setVencimiento(''); setStock(''); setPrecio('');
   };
 
   const eliminarProducto = (skuAEliminar: string) => {
@@ -81,33 +84,37 @@ export const Inventario = () => {
 
   const editarProducto = (producto: Producto) => {
     setSku(producto.sku); setNombre(producto.nombre); setMarca(producto.marca);
-    setCategoria(producto.categoria); setStock(producto.stock.toString()); setPrecio(producto.precio.toString());
+    setCategoria(producto.categoria); setVencimiento(producto.vencimiento); setStock(producto.stock.toString()); setPrecio(producto.precio.toString());
     setEditandoId(producto.sku);
   };
 
   const inputStyle = { padding: '8px', backgroundColor: '#333', color: 'white', border: '1px solid #555', borderRadius: '4px' };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px' }}>
       <h2 style={{ borderBottom: '2px solid #007bff', paddingBottom: '10px' }}>Gestión de Inventario</h2>
       <div style={{ background: '#1e1e1e', padding: '20px', borderRadius: '8px', marginTop: '20px', color: 'white' }}>
         <h3 style={{ marginTop: 0 }}>{editandoId ? '✏️ Editar Producto' : '➕ Agregar Nuevo Producto'}</h3>
         <form onSubmit={guardarProducto} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>SKU:</label>
-            <input type="text" value={sku} onChange={(e) => setSku(e.target.value)} disabled={!!editandoId} style={{ ...inputStyle, width: '100px', backgroundColor: editandoId ? '#555' : '#333' }} />
+            <input type="text" value={sku} onChange={(e) => setSku(e.target.value)} disabled={!!editandoId} style={{ ...inputStyle, width: '90px', backgroundColor: editandoId ? '#555' : '#333' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Nombre:</label>
-            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} style={{ ...inputStyle, width: '200px' }} />
+            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} style={{ ...inputStyle, width: '180px' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Marca:</label>
-            <input type="text" value={marca} onChange={(e) => setMarca(e.target.value)} style={{ ...inputStyle, width: '120px' }} />
+            <input type="text" value={marca} onChange={(e) => setMarca(e.target.value)} style={{ ...inputStyle, width: '110px' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Categoría:</label>
-            <input type="text" value={categoria} onChange={(e) => setCategoria(e.target.value)} style={{ ...inputStyle, width: '120px' }} />
+            <input type="text" value={categoria} onChange={(e) => setCategoria(e.target.value)} style={{ ...inputStyle, width: '110px' }} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={{ fontSize: '14px', marginBottom: '4px' }}>Vencimiento:</label>
+            <input type="date" value={vencimiento} onChange={(e) => setVencimiento(e.target.value)} style={{ ...inputStyle, width: '130px', cursor: 'pointer' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '14px', marginBottom: '4px' }}>Existencias:</label>
@@ -121,7 +128,7 @@ export const Inventario = () => {
                   setStock(valor);
                 }
               }} 
-              style={{ ...inputStyle, width: '80px' }} 
+              style={{ ...inputStyle, width: '75px' }} 
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -136,14 +143,14 @@ export const Inventario = () => {
                   setPrecio(valor);
                 }
               }} 
-              style={{ ...inputStyle, width: '100px' }} 
+              style={{ ...inputStyle, width: '90px' }} 
             />
           </div>
           <button type="submit" style={{ padding: '8px 20px', background: editandoId ? '#ffc107' : '#28a745', color: editandoId ? 'black' : 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px', fontWeight: 'bold' }}>
             {editandoId ? 'Actualizar' : 'Guardar'}
           </button>
           {editandoId && (
-            <button type="button" onClick={() => { setEditandoId(null); setSku(''); setNombre(''); setMarca(''); setCategoria(''); setStock(''); setPrecio(''); }} style={{ padding: '8px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px' }}>Cancelar</button>
+            <button type="button" onClick={() => { setEditandoId(null); setSku(''); setNombre(''); setMarca(''); setCategoria(''); setVencimiento(''); setStock(''); setPrecio(''); }} style={{ padding: '8px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', height: '35px' }}>Cancelar</button>
           )}
         </form>
       </div>
@@ -155,6 +162,7 @@ export const Inventario = () => {
             <th style={{ padding: '12px', border: '1px solid #444', textAlign: 'left' }}>Nombre</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Marca</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Categoría</th>
+            <th style={{ padding: '12px', border: '1px solid #444' }}>Vencimiento</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Existencias</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Precio</th>
             <th style={{ padding: '12px', border: '1px solid #444' }}>Acciones</th>
@@ -167,9 +175,10 @@ export const Inventario = () => {
               <td style={{ padding: '10px', border: '1px solid #444' }}>{producto.nombre}</td>
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>{producto.marca}</td>
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>{producto.categoria}</td>
+              <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>{producto.vencimiento}</td>
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center', fontWeight: 'bold' }}>{producto.stock}</td>
               <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>${producto.precio}</td>
-              <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center' }}>
+              <td style={{ padding: '10px', border: '1px solid #444', textAlign: 'center', minWidth: '150px' }}>
                 <button onClick={() => editarProducto(producto)} style={{ background: '#ffc107', color: 'black', border: 'none', padding: '6px 10px', marginRight: '5px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Editar</button>
                 <button onClick={() => eliminarProducto(producto.sku)} style={{ background: '#dc3545', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Eliminar</button>
               </td>
