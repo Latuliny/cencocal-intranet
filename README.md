@@ -24,7 +24,10 @@ Para la creación de este proyecto desde cero, se ejecutaron los siguientes coma
 Navega hacia la carpeta del proyecto y descarga los módulos necesarios de Node:
 
 cd cencocal-intranet
+
 npm install
+
+npm install react-router-dom
 
 3.Levantar el servidor de desarrollo
 Una vez finalizada la instalación, inicia Vite:
