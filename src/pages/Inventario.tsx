@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Producto } from '../types';
 import { useNavigate } from 'react-router-dom';
+import type { Producto } from '../types';
 
 export const Inventario = () => {
   const navigate = useNavigate();

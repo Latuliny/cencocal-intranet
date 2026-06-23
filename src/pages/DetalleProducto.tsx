@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Producto } from '../types';
+import type { Producto } from '../types';
 
 export const DetalleProducto = () => {
   const { sku } = useParams<{ sku: string }>();

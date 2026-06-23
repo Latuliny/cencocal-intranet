@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Despacho, EstadoDespacho } from '../types';
+import type { Despacho, EstadoDespacho } from '../types';
 
 export const Despachos = () => {
   const [despachos, setDespachos] = useState<Despacho[]>(() => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Cliente } from '../types';
+import type { Cliente } from '../types';
 
 export const Clientes = () => {
   const [clientes, setClientes] = useState<Cliente[]>(() => {
